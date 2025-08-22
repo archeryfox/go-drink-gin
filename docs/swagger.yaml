@@ -1,0 +1,470 @@
+basePath: /api/v1
+definitions:
+  models.Product:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  repository.CategoryModel:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  repository.FetishModel:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  repository.LikeModel:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  repository.NotificationModel:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      read:
+        type: boolean
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  repository.ProductFetishModel:
+    properties:
+      fetish_id:
+        type: integer
+      product_id:
+        type: integer
+    type: object
+  repository.ProductModel:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  repository.RecommendationModel:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_id:
+        type: integer
+      score:
+        type: number
+      user_id:
+        type: integer
+    type: object
+  service.CreateProductRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  service.UpdateProductRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Пример API-магазина (демо). Использует GORM, Redis, DDD-слои.
+  title: FurryShop API
+  version: "1.0"
+paths:
+  /categories:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/repository.CategoryModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.CategoryModel'
+      summary: Create category
+      tags:
+      - categories
+  /categories/{id}:
+    get:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repository.CategoryModel'
+      summary: Get category by id
+      tags:
+      - categories
+  /fetishes:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repository.FetishModel'
+            type: array
+      summary: List fetishes
+      tags:
+      - fetishes
+  /fetishes/{id}:
+    get:
+      parameters:
+      - description: Fetish ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repository.FetishModel'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get fetish
+      tags:
+      - fetishes
+  /greet/{name}:
+    get:
+      consumes:
+      - application/json
+      description: greet user with provided name
+      parameters:
+      - description: User name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Greet user by name
+      tags:
+      - hello
+  /likes:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Like
+        in: body
+        name: like
+        required: true
+        schema:
+          $ref: '#/definitions/repository.LikeModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.LikeModel'
+      summary: Create like
+      tags:
+      - likes
+  /likes/product/{id}/count:
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      summary: Count likes for product
+      tags:
+      - likes
+  /notifications:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/repository.NotificationModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.NotificationModel'
+      summary: Create notification
+      tags:
+      - notifications
+  /notifications/{id}/read:
+    put:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Mark notification as read
+      tags:
+      - notifications
+  /notifications/user/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repository.NotificationModel'
+            type: array
+      summary: List notifications for user
+      tags:
+      - notifications
+  /product_fetish:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ProductFetish
+        in: body
+        name: product_fetish
+        required: true
+        schema:
+          $ref: '#/definitions/repository.ProductFetishModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.ProductFetishModel'
+      summary: Attach fetish to product
+      tags:
+      - product_fetish
+  /products:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repository.ProductModel'
+            type: array
+      summary: List products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.ProductModel'
+      summary: Create product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete product
+      tags:
+      - products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repository.ProductModel'
+        "404":
+          description: Not Found
+      summary: Get product
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repository.ProductModel'
+      summary: Update product
+      tags:
+      - products
+  /recommendations:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Recommendation
+        in: body
+        name: recommendation
+        required: true
+        schema:
+          $ref: '#/definitions/repository.RecommendationModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repository.RecommendationModel'
+      summary: Create recommendation
+      tags:
+      - recommendations
+  /recommendations/user/{user_id}:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repository.RecommendationModel'
+            type: array
+      summary: List recommendations for user
+      tags:
+      - recommendations
+swagger: "2.0"
